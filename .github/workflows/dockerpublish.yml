@@ -2,10 +2,10 @@ name: Docker Image CI
 
 on:
   push:
-    branches: '**'
-    tags: '**'
+    branches: "**"
+    tags: "**"
   pull_request:
-    branches: '**'
+    branches: "**"
   schedule:
     - cron: 0 0 * * 6
 
@@ -14,7 +14,20 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php_version: ["5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3", "8.4"]
+        php_version:
+          [
+            "5.6",
+            "7.0",
+            "7.1",
+            "7.2",
+            "7.3",
+            "7.4",
+            "8.0",
+            "8.1",
+            "8.2",
+            "8.3",
+            "8.4",
+          ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,8 +36,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images:
-            laradock/workspace
+          images: laradock/workspace
           flavor: |
             suffix=-${{ matrix.php_version }}
           tags: |
@@ -40,12 +52,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to Docker Hub
-        if: ${{ (github.repository == 'laradock/workspace') && (github.ref == 'refs/heads/master') }}
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_HUB_USER }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      # - name: Login to Docker Hub
+      #   if: ${{ (github.repository == 'laradock/workspace') && (github.ref == 'refs/heads/master') }}
+      #   uses: docker/login-action@v2
+      #   with:
+      #     username: ${{ secrets.DOCKER_HUB_USER }}
+      #     password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -53,5 +65,5 @@ jobs:
           file: Dockerfile-${{ matrix.php_version }}
           # skip linux/arm64
           platforms: linux/amd64,linux/386
-          push: ${{ (github.event_name != 'pull_request') && (github.repository == 'laradock/workspace') && (github.ref == 'refs/heads/master') }}
-          tags: ${{ steps.meta.outputs.tags }}
+          # push: ${{ (github.event_name != 'pull_request') && (github.repository == 'laradock/workspace') && (github.ref == 'refs/heads/master') }}
+          # tags: ${{ steps.meta.outputs.tags }}
